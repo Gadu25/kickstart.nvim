@@ -220,10 +220,10 @@ do
   vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
   -- TIP: Disable arrow keys in normal mode
-  -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
-  -- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
-  -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
-  -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+   vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+   vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+   vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+   vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
   -- Keybinds to make split navigation easier.
   --  Use CTRL+<hjkl> to switch between windows
@@ -343,6 +343,53 @@ do
   --
   -- We first install it from https://github.com/NMAC427/guess-indent.nvim
   -- and then call its `setup()` function to start it with default settings.
+  
+  -- MY_CUSTOM
+  vim.pack.add { gh 'sindrets/diffview.nvim' }
+  
+  require('diffview').setup({
+    enhanced_diff_hl = true, -- better intraline highlighting
+    use_icons = vim.g.have_nerd_font,
+    
+    view = {
+      default = {
+        layout = 'diff2_horizontal',
+        disable_diagnostics = false,
+      },
+    },
+    
+    file_panel = {
+      listing_style = 'tree',
+      win_config = {
+        position = 'left',
+        width = 35,
+      },
+    },
+    
+    keymaps = {
+      view = {
+        -- navigation
+        ['<tab>'] = false, -- you already have better window nav
+        ['[x'] = false,
+        [']x'] = false,
+      },
+      
+      file_panel = {
+        ['j'] = false,
+        ['k'] = false,
+      },
+    },
+    
+    hooks = {
+      diff_buf_read = function(bufnr)
+        -- enforce sane diff behavior
+        vim.opt_local.wrap = false
+        vim.opt_local.cursorline = true
+        vim.opt_local.colorcolumn = ''
+      end,
+    },
+  })
+
   vim.pack.add { gh 'NMAC427/guess-indent.nvim' }
   require('guess-indent').setup {}
 
@@ -352,6 +399,10 @@ do
   -- Adds git related signs to the gutter, as well as utilities for managing changes
   vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
   require('gitsigns').setup {
+    current_line_blame = true, -- Adds the inline git blame text
+    current_line_blame_opts = {
+      delay = 300, -- Wait 300ms before showing the text
+    },
     signs = {
       add = { text = '+' }, ---@diagnostic disable-line: missing-fields
       change = { text = '~' }, ---@diagnostic disable-line: missing-fields
@@ -389,6 +440,7 @@ do
       comments = { italic = false }, -- Disable italics in comments
     },
   }
+
 
   -- Load the colorscheme here.
   -- Like many other themes, this one has different styles, and you could load
@@ -477,6 +529,22 @@ do
   -- This opens a window that shows you all of the keymaps for the current
   -- Telescope picker. This is really useful to discover what Telescope can
   -- do as well as how to actually do it!
+
+  -- MY_CUSTOM
+  vim.pack.add {
+    gh 'nvim-lua/plenary.nvim',
+    gh 'sindrets/diffview.nvim',
+  }
+
+  -- Diffview core
+  vim.keymap.set('n', '<leader>gd', '<cmd>DiffviewOpen<cr>', { desc = 'Git diff view' })
+  vim.keymap.set('n', '<leader>gh', '<cmd>DiffviewFileHistory %<cr>', { desc = 'File history' })
+  vim.keymap.set('n', '<leader>gH', '<cmd>DiffviewFileHistory<cr>', { desc = 'Repo history' })
+  vim.keymap.set('n', '<leader>gc', '<cmd>DiffviewClose<cr>', { desc = 'Close diffview' })
+  
+  -- Advanced workflows
+  vim.keymap.set('n', '<leader>gD', '<cmd>DiffviewOpen HEAD~1<cr>', { desc = 'Last commit diff' })
+  vim.keymap.set('n', '<leader>gB', '<cmd>DiffviewOpen origin/HEAD...HEAD<cr>', { desc = 'Branch diff' })
 
   ---@type (string|vim.pack.Spec)[]
   local telescope_plugins = {
