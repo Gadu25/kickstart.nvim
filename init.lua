@@ -537,14 +537,14 @@ do
   }
 
   -- Diffview core
-  vim.keymap.set('n', '<leader>gd', '<cmd>DiffviewOpen<cr>', { desc = 'Git diff view' })
-  vim.keymap.set('n', '<leader>gh', '<cmd>DiffviewFileHistory %<cr>', { desc = 'File history' })
-  vim.keymap.set('n', '<leader>gH', '<cmd>DiffviewFileHistory<cr>', { desc = 'Repo history' })
-  vim.keymap.set('n', '<leader>gc', '<cmd>DiffviewClose<cr>', { desc = 'Close diffview' })
-  
-  -- Advanced workflows
-  vim.keymap.set('n', '<leader>gD', '<cmd>DiffviewOpen HEAD~1<cr>', { desc = 'Last commit diff' })
-  vim.keymap.set('n', '<leader>gB', '<cmd>DiffviewOpen origin/HEAD...HEAD<cr>', { desc = 'Branch diff' })
+vim.keymap.set('n', '<leader>gd', '<cmd>DiffviewOpen<cr>', { desc = 'Git diff view' })
+vim.keymap.set('n', '<leader>gh', '<cmd>DiffviewFileHistory %<cr>', { desc = 'File history' })
+vim.keymap.set('n', '<leader>gH', '<cmd>DiffviewFileHistory<cr>', { desc = 'Repo history' })
+vim.keymap.set('n', '<leader>gc', '<cmd>DiffviewClose<cr>', { desc = 'Close diffview' })
+
+-- Advanced workflows
+vim.keymap.set('n', '<leader>gD', '<cmd>DiffviewOpen HEAD~1<cr>', { desc = 'Last commit diff' })
+vim.keymap.set('n', '<leader>gB', '<cmd>DiffviewOpen origin/HEAD...HEAD<cr>', { desc = 'Branch diff' })
 
   ---@type (string|vim.pack.Spec)[]
   local telescope_plugins = {
@@ -761,7 +761,6 @@ do
   ---@type table<string, vim.lsp.Config>
   local servers = {
     -- clangd = {},
-    -- gopls = {},
     -- pyright = {},
     -- rust_analyzer = {},
     --
@@ -770,7 +769,10 @@ do
     --
     -- But for many setups, the LSP (`ts_ls`) will work just fine
     -- ts_ls = {},
-
+    
+    gopls = {}, -- Used to format Go code
+    ts_ls = {}, -- Used to format Javascript and Typescript
+    vue_ls = {}, -- Used to format vue
     stylua = {}, -- Used to format Lua code
 
     -- Special Lua Config, as recommended by neovim help docs
@@ -818,6 +820,9 @@ do
   -- Automatically install LSPs and related tools to stdpath for Neovim
   require('mason').setup {}
 
+  require('mason-lspconfig').setup {
+    ensure_installed = vim.tbl_keys(servers),
+  }
   -- Ensure the servers and tools above are installed
   --
   -- To check the current status of installed tools and/or manually install
