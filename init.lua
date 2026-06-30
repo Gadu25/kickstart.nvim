@@ -416,6 +416,8 @@ do
   -- [[ mini.nvim ]]
   --  A collection of various small independent plugins/modules
   vim.pack.add { gh 'nvim-mini/mini.nvim' }
+  require('mini.files').setup()
+  vim.keymap.set('n', '<leader>e', function() MiniFiles.open() end, { desc = '[E]xplorer' })
 
   -- If a nerd font is available, load the icons module for pretty icons in various plugins.
   if vim.g.have_nerd_font then
