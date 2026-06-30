@@ -160,6 +160,14 @@ do
   vim.keymap.set('n', '<S-h>', ':tabprevious<CR>')
   vim.keymap.set('n', '<S-l>', ':tabnext<CR>')
 
+  vim.keymap.set("n", "<C-Up>",    "<cmd>resize +2<CR>",          { desc = "Increase window height" })
+  vim.keymap.set("n", "<C-Down>",  "<cmd>resize -2<CR>",          { desc = "Decrease window height" })
+  vim.keymap.set("n", "<C-Left>",  "<cmd>vertical resize -2<CR>", { desc = "Decrease window width" })
+  vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increase window width" })
+
+  -- for reseting the config
+  vim.keymap.set('n', '<leader>R', '<cmd>source $MYVIMRC<CR>', { desc = 'Reload config' })
+
   -- [[ Basic Autocommands ]]
   --  See `:help lua-guide-autocommands`
 
@@ -237,6 +245,7 @@ do
       end
     end,
   })
+
 end
 
 ---Because most plugins are hosted on GitHub, you can use the helper
@@ -350,6 +359,35 @@ do
       { 'gr', group = 'LSP Actions', mode = { 'n' } },
     },
   }
+  -- OPEN CODE
+  vim.pack.add { gh 'nickjvandyke/opencode.nvim' }
+  vim.g.opencode_opts = {}
+
+  vim.o.autoread = true
+
+  vim.keymap.set({ 'n', 'x' }, '<leader>oa', function()
+    require('opencode').ask('@this: ')
+  end, { desc = 'Ask OpenCode' })
+
+  vim.keymap.set({ 'n', 'x' }, '<leader>os', function()
+    require('opencode').select()
+  end, { desc = 'Select OpenCode' })
+
+  vim.keymap.set({ 'n', 'x' }, 'go', function()
+    return require('opencode').operator('@this ')
+  end, { expr = true, desc = 'Append range to OpenCode' })
+
+  vim.keymap.set('n', 'goo', function()
+    return require('opencode').operator('@this ') .. '_'
+  end, { expr = true, desc = 'Append line to OpenCode' })
+
+  vim.keymap.set('n', '<C-u>', function()
+    require('opencode').command('session.half.page.up')
+  end)
+
+  vim.keymap.set('n', '<C-d>', function()
+    require('opencode').command('session.half.page.down')
+  end)
 
   -- [[ Colorscheme ]]
   -- You can easily change to a different colorscheme.
