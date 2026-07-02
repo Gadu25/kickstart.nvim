@@ -417,6 +417,26 @@ do
   --  A collection of various small independent plugins/modules
   vim.pack.add { gh 'nvim-mini/mini.nvim' }
   require('mini.files').setup()
+
+  local map_split = function(buf_id, lhs, direction)
+    local rhs = function()
+      local entry = MiniFiles.get_fs_entry()
+      if entry and entry.fs_type == 'file' then
+        MiniFiles.close()
+        vim.cmd(direction .. ' ' .. vim.fn.fnameescape(entry.path))
+      end
+    end
+    vim.keymap.set('n', lhs, rhs, { buffer = buf_id })
+  end
+
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'MiniFilesBufferCreate',
+    callback = function(args)
+      local buf_id = args.data.buf_id
+      map_split(buf_id, 's', 'split')
+      map_split(buf_id, 'v', 'vsplit')
+    end,
+  })
   vim.keymap.set('n', '<leader>e', function() MiniFiles.open() end, { desc = '[E]xplorer' })
 
   -- If a nerd font is available, load the icons module for pretty icons in various plugins.
