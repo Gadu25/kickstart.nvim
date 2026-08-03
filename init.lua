@@ -168,6 +168,29 @@ do
   -- for reseting the config
   vim.keymap.set('n', '<leader>R', '<cmd>source $MYVIMRC<CR>', { desc = 'Reload config' })
 
+  -- Open current file/buffer in external viewer (WSL: Windows, Linux: xdg-open)
+  vim.keymap.set('n', '<leader>ox', function()
+    local path = vim.fn.expand '%:p'
+    if path == '' then
+      vim.notify('No file to open', vim.log.levels.WARN)
+      return
+    end
+    if vim.fn.executable 'wslpath' == 1 then
+      vim.fn.jobstart({ 'wslpath', '-w', path }, {
+        stdout_buffered = true,
+        on_stdout = function(_, data)
+          if data then
+            vim.fn.jobstart({ 'explorer.exe', table.concat(data, '') })
+          end
+        end,
+      })
+    elseif vim.fn.executable 'xdg-open' == 1 then
+      vim.fn.jobstart({ 'xdg-open', path })
+    else
+      vim.notify('No external opener found', vim.log.levels.WARN)
+    end
+  end, { desc = 'Open file e[x]ternally' })
+
   -- [[ Basic Autocommands ]]
   --  See `:help lua-guide-autocommands`
 
@@ -429,12 +452,49 @@ do
     vim.keymap.set('n', lhs, rhs, { buffer = buf_id })
   end
 
+  local media_exts = {
+    png = true, jpg = true, jpeg = true, gif = true, bmp = true, webp = true,
+    tiff = true, tif = true, svg = true, ico = true,
+    mp4 = true, avi = true, mkv = true, mov = true, webm = true, wmv = true, flv = true,
+    mp3 = true, wav = true, ogg = true, flac = true, m4a = true, aac = true,
+    pdf = true,
+  }
+
+  local media_open = function(path)
+    if vim.fn.executable 'wslpath' == 1 then
+      vim.fn.jobstart({ 'wslpath', '-w', path }, {
+        stdout_buffered = true,
+        on_stdout = function(_, data)
+          if data then
+            vim.fn.jobstart({ 'explorer.exe', table.concat(data, '') })
+          end
+        end,
+      })
+    elseif vim.fn.executable 'xdg-open' == 1 then
+      vim.fn.jobstart({ 'xdg-open', path })
+    end
+  end
+
   vim.api.nvim_create_autocmd('User', {
     pattern = 'MiniFilesBufferCreate',
     callback = function(args)
       local buf_id = args.data.buf_id
       map_split(buf_id, 's', 'split')
       map_split(buf_id, 'v', 'vsplit')
+
+      vim.keymap.set('n', 'l', function()
+        local entry = MiniFiles.get_fs_entry()
+        if not entry then return MiniFiles.go_in() end
+        if entry.fs_type == 'directory' then return MiniFiles.go_in() end
+
+        local ext = vim.fn.fnamemodify(entry.path, ':e'):lower()
+        if media_exts[ext] then
+          media_open(entry.path)
+        else
+          MiniFiles.close()
+          vim.cmd.edit(vim.fn.fnameescape(entry.path))
+        end
+      end, { buffer = buf_id, desc = 'Open file or view media externally' })
     end,
   })
   vim.keymap.set('n', '<leader>e', function() MiniFiles.open() end, { desc = '[E]xplorer' })
